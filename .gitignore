@@ -1,0 +1,17 @@
+# Target compilation directories
+**/target/
+*.jar
+*.war
+
+# IDE Specific metadata
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# System and Environment configurations
+.env
+log/
+*.log
