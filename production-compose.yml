@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -25,7 +24,7 @@ services:
       - "6379:6379"
 
   order-service:
-    build: ./order-service
+    build: ./order
     container_name: prod_order_service
     ports:
       - "8081:8081"
@@ -40,7 +39,7 @@ services:
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
 
   payment-service:
-    build: ./payment-service
+    build: ./payment
     container_name: prod_payment_service
     ports:
       - "8082:8082"
