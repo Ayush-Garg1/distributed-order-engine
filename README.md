@@ -130,8 +130,15 @@ Application performance and execution delays were carefully monitored and record
 
 ### Environment Configurations
 
-   Create a file named exactly .env inside your root project folder (E:\Projects\distributed-order-engine) and fill it with your personal database keys:
-env DB_URL=jdbc:postgresql://your-neon-endpoint.singapore.neon.tech/neondb?sslmode=require DB_USER=your_neon_database_username DB_PASSWORD=your_neon_database_password KAFKA_BROKER=kafka:29092 REDIS_HOST=redis
+   Create a file named exactly .env inside your root project folder `(E:\Projects\distributed-order-engine)` and fill it with your personal database keys:
+env
+```
+DB_URL=jdbc:postgresql://your-neon-endpoint.singapore.neon.tech/neondb?sslmode=require
+DB_USER=your_neon_database_username
+DB_PASSWORD=your_neon_database_password
+KAFKA_BROKER=kafka:29092
+REDIS_HOST=redis
+```
 
 
 ### Rebuild and Launch the Container Architecture
