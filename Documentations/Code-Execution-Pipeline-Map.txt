@@ -1,0 +1,66 @@
+[ Client Postman Traffic ]
+            │
+            ▼
+ 1. RateLimiterFilter.java  (package: ...order.config)
+            │  • Intercepts raw HttpServletRequest at the edge.
+            │  • Runs the Lua script against Redis container.
+            │  • If compliant, invokes chain.doFilter().
+            ▼
+ 2. OrderController.java    (package: ...order.controller)
+            │  • Spring Web maps HTTP POST to createOrder().
+            │  • Extracts userId and amount from Payload Map.
+            │  • Invokes orderService.placeOrder().
+            ▼
+ 3. OrderService.java       (package: ...order.service)
+            │  • Triggers verifyUserContext() ──► Intercepted by Redis @Cacheable proxy.
+            │  • Enters Spring @Transactional database boundary.
+            │  • Calls orderRepository.save(order).
+            │  • Serializes payload map via Jackson ObjectMapper.
+            │  • Calls outboxRepository.save(outbox).
+            ▼  • Transaction commits. Returns Order entity up to Controller.
+[ User Unblocked: Postman instantly receives HTTP 201 Created response ]
+                  === ASYNCHRONOUS BACKGROUND LIFECYCLE ===
+                       (Wakes up every 500 milliseconds)
+ 4. OutboxScheduler.java    (package: ...order.scheduler)
+            │  • Spring @Scheduled thread invokes processOutbox().
+            │  • Calls outboxRepository.findByStatusOrderByCreatedAtAsc("PENDING").
+            │  • Allocates a Java 21 Virtual Thread via newVirtualThreadPerTaskExecutor().
+            ▼
+ 5. KafkaTemplate.java      (Spring Core Library Class)
+            │  • Scheduler invokes kafkaTemplate.send("order-events", orderId, payload).
+            ▼  • Waits for asynchronous broker cluster acknowledgment (.get()).
+ 6. OutboxScheduler.java    (package: ...order.scheduler)
+            │  • Success callback triggered.
+            │  • Modifies local memory event reference: event.setStatus("PROCESSED").
+            │  • Calls outboxRepository.save(event) to update state in Neon Cloud DB.
+            ▼
+[ Event sits safely inside Apache Kafka topic container: "order-events" ]
+                 === DOWNSTREAM CONSUMER MICROSERVICE LIFE ===
+                  (Invoked instantly via push stream notification)
+ 7. KafkaConsumerConfig.java (package: ...payment.config)
+            │  • ConcurrentKafkaListenerContainerFactory intercepts stream payload.
+            │  • Wraps the processing pipeline inside a DefaultErrorHandler context.
+            ▼
+ 8. OrderEventConsumer.java  (package: ...payment.consumer)
+            │  • @KafkaListener annotation triggers handleOrderEvent(ConsumerRecord).
+            │  • Extracts orderId tracking hash from record.key().
+            │  • Calls repository.existsById(orderId) (Checks processed_events table in Neon).
+            │      ├───[ TRUE ]  ──► Logs duplicate intercept warning. Stops cleanly.
+            │      └───[ FALSE ] ──► Continues processing execution block logic loops.
+            │  • If payload matches crash parameters, throws IllegalArgumentException.
+            ▼      │
+┌──────────────────┴──────────────────────────────────────────────────────────────────┐
+│ ERROR PATH ROUTING (If Exception Thrown)                                            │
+│                                                                                     │
+│ 9. DefaultErrorHandler  ──► Retries OrderEventConsumer 3 times (1000ms delay cycles)│
+│            │                                                                        │
+│            ▼                                                                        │
+│ 10. DeadLetterPublishingRecoverer ──► KafkaTemplate sends payload straight to DLQ   │
+│                                       Topic Hub: ["order-events-dlq"]               │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+            │ (Normal Processing Path Continue)
+            ▼
+11. ProcessedEventsRepository.java (package: ...payment.repository)
+            • Consumer calls repository.save(new ProcessedEventLog(orderId, now)).
+            • Key footprint successfully committed to Neon Cloud Database.
+            • Execution complete. Offset safely committed back to Kafka Broker.
