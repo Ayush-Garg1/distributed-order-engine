@@ -158,23 +158,31 @@ docker compose -f production-compose.yml --env-file .env up --build -d
 ### Verify System Health Status
 
 Ensure all containers are up and running green:
-powershell docker ps
+```powershell docker ps```
 
 ### Execute a Live Integration Test
 
 Fire a standard order placement body payload straight into your application stream using PowerShell:
-powershell Invoke-RestMethod -Method Post -Uri "http://localhost:8081/api/orders" -ContentType "application/json" -Body '{"userId": "a3b4c5d6-e7f8-90a1-b2c3-d4e5f6a7b8c9", "amount": 199.99}'
+powershell
+```
+Invoke-RestMethod -Method Post -Uri "http://localhost:8081/api/orders" -ContentType "application/json" -Body '{"userId": "a3b4c5d6-e7f8-90a1-b2c3-d4e5f6a7b8c9", "amount": 199.99}'
+```
 (This will return a clean JSON string showing your auto-generated order parameters marked with a status value of "PENDING" in under 15ms).
 
 ### Review the Performance Telemetry Logs
 
 To check your live latency metrics and watch your outbox thread dispatch events to Kafka, inspect your container output streams:
-powershell docker logs prod_order_service --tail 30
+powershell 
+```
+docker logs prod_order_service --tail 30
+```
 
 ### Safely Stopping the Project
 
 Whenever you are done coding or practicing for interviews, stop the background clusters to release your computer's RAM and CPU resources safely:
+```
 powershell docker compose -f production-compose.yml down
+```
 (Note: Because your records are saved inside the Neon Cloud database, shutting down your containers will never delete your order histories or database data).
 
 ## 📂 Multi-Module Repository Layout
