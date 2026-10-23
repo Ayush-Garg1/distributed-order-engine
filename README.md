@@ -1,12 +1,5 @@
 # High-Availability Distributed Transaction & Order Processing Engine
 
-[![Java](https://shields.io)](https://openjdk.org)
-[![Spring Boot](https://shields.io)](https://spring.io)
-[![Apache Kafka](https://shields.io)](https://apache.org)
-[![Redis](https://shields.io)](https://redis.io)
-[![PostgreSQL](https://shields.io)](https://neon.tech)
-[![Docker](https://shields.io)](https://docker.com)
-
 An enterprise-grade, event-driven ordering system engineered to resolve critical core distributed systems failure vectors: **dual-write integrity loss**, **concurrent race conditions under heavy traffic spikes**, and **downstream asynchronous message duplication**.
 
 By completely decoupling high-volume ingestion from heavy billing settlement routines using the **Transactional Outbox Pattern** and **Java 21 Virtual Threads**, the system unblocks web requests instantly, achieving an edge processing latency of **sub-15ms**.
