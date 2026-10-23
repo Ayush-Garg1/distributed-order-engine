@@ -12,7 +12,7 @@ public class UserCacheComponent {
 
     @Cacheable(value = "users", key = "#userId")
     public String verifyUserContext(UUID userId) {
-        log.info("👉 Cache MISS - Querying Core Identity Layer directly...");
+        log.info("-> Cache MISS - Querying Core Identity Layer directly...");
         return "USER_VALID_ACTIVE";
     }
 }

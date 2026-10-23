@@ -37,7 +37,7 @@ public class OrderService {
         long cacheStart = System.nanoTime();
         userCacheComponent.verifyUserContext(userId);
         long cacheDurationMs = (System.nanoTime() - cacheStart) / 1_000_000;
-        log.info("⏱️ TELEMETRY: Redis Cache-Aside Verification Latency: {} ms", cacheDurationMs);
+        log.info("--> TELEMETRY: Redis Cache-Aside Verification Latency: {} ms", cacheDurationMs);
 
         // Metric Vector 2: Measure Neon Cloud DB Commit Latency
         long dbStart = System.nanoTime();
@@ -62,7 +62,7 @@ public class OrderService {
         }
 
         long dbDurationMs = (System.nanoTime() - dbStart) / 1_000_000;
-        log.info("⏱️ TELEMETRY: Neon Cloud DB Atomic Transaction Commit Latency: {} ms", dbDurationMs);
+        log.info("--> TELEMETRY: Neon Cloud DB Atomic Transaction Commit Latency: {} ms", dbDurationMs);
 
         return order;
     }
